@@ -1,6 +1,5 @@
 import java.nio.ByteBuffer;
 import java.security.*;
-import java.util.Base64;
 
 // This part is following the Bitcoin spec from the bitcoin white paper (Transactions section)
 // For the moment is mainly just a struct that contains the data for a transaction
@@ -34,7 +33,7 @@ public class CoinTransaction {
         System.out.println("Hashing transaction");
         byte[] hashed = md.digest(key);
 
-        System.out.printf("Transaction::hash() result: %s\n", Base64.getEncoder().encodeToString(hashed));
+        System.out.printf("Transaction::hash() result: %s\n", Util.bytesToHex(hashed));
         return hashed;
     }
 }
