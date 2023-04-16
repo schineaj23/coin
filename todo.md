@@ -1,0 +1,8 @@
+- [ ] Check wallet balances with Block
+- [ ] Verify transactions
+- [ ] Fix mining / coin creation without need for god user
+- [ ] Networking the users 
+- [ ] Create wallet (I think this is really just refactoring User)
+- [ ] Serializing transactions, save wallets to computer
+- [ ] Use decentralized time (fix timestamp bug)
+- [ ] Create nice interface to visualize blocks, wallet balance etc
