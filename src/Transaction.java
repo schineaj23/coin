@@ -3,15 +3,14 @@ import java.security.*;
 
 // This part is following the Bitcoin spec from the bitcoin white paper (Transactions section)
 // For the moment is mainly just a struct that contains the data for a transaction
-public class CoinTransaction {
+public class Transaction {
     public PublicKey newOwnerKey;
     public byte[] oldOwnerSignature;
     public byte[] timestampHash;
     public double amount;
 
-    public byte[] hash() throws NoSuchAlgorithmException {
+    public byte[] hash() {
         System.out.println("Transaction::hash() called");
-        MessageDigest md = MessageDigest.getInstance("SHA256");
         int keyLen = newOwnerKey.getEncoded().length;
         byte[] key = new byte[keyLen + timestampHash.length + oldOwnerSignature.length + 8];
 
@@ -31,7 +30,10 @@ public class CoinTransaction {
 
         // Add this all to one array and hash it
         System.out.println("Hashing transaction");
-        byte[] hashed = md.digest(key);
+        byte[] hashed = Util.hashBuffer(key);
+
+        // If this is null, something went horribly wrong!
+        assert hashed != null;
 
         System.out.printf("Transaction::hash() result: %s\n", Util.bytesToHex(hashed));
         return hashed;
