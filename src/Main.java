@@ -3,12 +3,12 @@ import java.security.*;
 import java.util.Base64;
 
 public class Main {
-     public static void main(String[] args) throws NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-
-        CoinTransaction firstTransaction = new CoinTransaction();
+    public static void initialTransactionTest() {
+        Transaction firstTransaction = new Transaction();
         try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+
             // Create the "original owner" keyPair for the transaction
             KeyPair ownerZeroKeyPair = keyGen.generateKeyPair();
 
@@ -39,9 +39,7 @@ public class Main {
             md.reset();
 
             // Create the new buffer for signing
-            byte[] pkPreviousBuffer = new byte[ownerOnePublicKeyEncoded.length + previousTransactionHash.length];
-            System.arraycopy(ownerOnePublicKeyEncoded, 0, pkPreviousBuffer, 0, ownerOnePublicKeyEncoded.length);
-            System.arraycopy(previousTransactionHash, 0, pkPreviousBuffer, ownerOnePublicKeyEncoded.length, previousTransactionHash.length);
+            byte[] pkPreviousBuffer = Util.concatenateBuffers(previousTransactionHash, ownerOnePublicKeyEncoded);
 
             // Hash these two together before signing
             byte[] hashedPreviousBuffer = md.digest(pkPreviousBuffer);
@@ -60,7 +58,7 @@ public class Main {
             // Great, now that we have our first transaction, let's try making another one and verifying it!
             // Creating another keyPair for ownerTwo
             KeyPair ownerTwoKeyPair = keyGen.generateKeyPair();
-            CoinTransaction secondTransaction = new CoinTransaction();
+            Transaction secondTransaction = new Transaction();
             secondTransaction.newOwnerKey = ownerTwoKeyPair.getPublic();
             secondTransaction.amount = 1;
             secondTransaction.timestampHash = md.digest(ByteBuffer.allocate(8).putLong(System.currentTimeMillis()).array());
@@ -73,9 +71,8 @@ public class Main {
             byte[] transactionHash = firstTransaction.hash();
 
             // Create the new buffer for signing
-            pkPreviousBuffer = new byte[thirdOwnerPublicKey.length + transactionHash.length];
-            System.arraycopy(thirdOwnerPublicKey, 0, pkPreviousBuffer, 0, thirdOwnerPublicKey.length);
-            System.arraycopy(transactionHash, 0, pkPreviousBuffer, thirdOwnerPublicKey.length, transactionHash.length);
+            pkPreviousBuffer = Util.concatenateBuffers(transactionHash, thirdOwnerPublicKey);
+            
             // Hash the two together
             byte[] secondTransactionPreviousBuffer = md.digest(pkPreviousBuffer);
             md.reset();
@@ -108,5 +105,46 @@ public class Main {
         } catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static KeyPair GOD_KEY_PAIR;
+
+    // Debug function to give coins to someone, remove this when the network is really working
+    public static Transaction mintCoinDebug(User recipient, double amount) {
+        System.out.printf("Attempting to mint %.2f coins for user %s\n", amount, recipient.getName());
+        Transaction t = new Transaction();
+        t.amount = amount;
+        t.newOwnerKey = recipient.getPublicKey();
+
+        try {
+            Signature dummySignature = Signature.getInstance("SHA256withRSA");
+            dummySignature.initSign(GOD_KEY_PAIR.getPrivate());
+            dummySignature.update(ByteBuffer.allocate(8).putLong(System.currentTimeMillis()).array());
+
+            // God cares not about transactions, sign the time instead
+            t.oldOwnerSignature = dummySignature.sign();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        // FIXME: timestamp bug
+        t.timestampHash = Util.hashBuffer(ByteBuffer.allocate(8).putLong(System.currentTimeMillis()).array());
+
+        return t;
+    }
+
+    public static void main(String[] args) throws NoSuchAlgorithmException {
+        GOD_KEY_PAIR = KeyPairGenerator.getInstance("RSA").generateKeyPair();
+
+        User bobby = new User("bobby");
+        User jimmy = new User("jimmy");
+        
+        // Mint a coin for bobby
+        Transaction mintTransaction = mintCoinDebug(bobby, 1);
+
+        // Have bobby send jimmy some moneys
+        bobby.send(mintTransaction, jimmy, 0.5);
+
+        System.out.println("Did it work? idk bobby should now have 0.5");
     }
 }
