@@ -1,5 +1,6 @@
 import java.nio.ByteBuffer;
 import java.security.*;
+import java.util.ArrayList;
 import java.util.Base64;
 
 public class Main {
@@ -135,6 +136,7 @@ public class Main {
 
     public static void main(String[] args) throws NoSuchAlgorithmException {
         GOD_KEY_PAIR = KeyPairGenerator.getInstance("RSA").generateKeyPair();
+        ArrayList<Block> blocks = new ArrayList<>();
 
         User bobby = new User("bobby");
         User jimmy = new User("jimmy");
@@ -142,8 +144,47 @@ public class Main {
         // Mint a coin for bobby
         Transaction mintTransaction = mintCoinDebug(bobby, 1);
 
+        // Create a block to put our transactions into!
+        Block testBlock = new Block(mintTransaction);
+
         // Have bobby send jimmy some moneys
-        bobby.send(mintTransaction, jimmy, 0.5);
+        Transaction prevTransaction = mintTransaction;
+        for(int i=0;i<5;i++) {
+            System.out.println(i);
+            prevTransaction = bobby.send(prevTransaction, jimmy, 0.5);
+            testBlock.addTransaction(prevTransaction);
+        }
+        testBlock.timestamp();
+        testBlock.previousBlockHash = new byte[]{0,0,0,0,0,0}; // zero this out for now
+        System.out.println("testBlock " + testBlock);
+
+        // Create a block to put our transactions into!
+        Block secondBlock = new Block(mintCoinDebug(jimmy, 1));
+        secondBlock.previousBlockHash = testBlock.hash();
+
+        // Have bobby send jimmy some moneys
+        Transaction pt = secondBlock.getRootTransaction().get();
+        for(int i=0;i<5;i++) {
+            System.out.println(i);
+            pt = jimmy.send(pt, bobby, 0.5);
+            secondBlock.addTransaction(pt);
+        }
+        secondBlock.timestamp();
+        System.out.println("secondBlock " + secondBlock);
+
+        blocks.add(testBlock);
+        blocks.add(secondBlock);
+
+        // TODO: Payment verification process
+        // 1. have transaction object that we want to get
+        // 2. get all blocks headers
+        // 3. find the block that has the same timestamp as our transaction
+        // 4. calculate merkle proof (need to implement this)
+        // https://wiki.bitcoinsv.io/index.php/Simplified_Payment_Verification
+        // basically ask the node to verify the transaction by having it take the hash of the transaction
+        // and merkle tree from that. if eventually we get to the merkle root, then we know that the payment is valid
+        // https://medium.com/crypto-0-nite/merkle-proofs-explained-6dd429623dc5
+        // https://ethereum.org/en/developers/tutorials/merkle-proofs-for-offline-data-integrity/
 
         System.out.println("Did it work? idk bobby should now have 0.5");
     }

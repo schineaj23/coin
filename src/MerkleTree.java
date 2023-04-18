@@ -1,34 +1,28 @@
 import java.util.ArrayList;
+import java.util.Set;
 
 /*  Resources for this:
-    https://en.wikipedia.org/wiki/Merkle_tree
-    https://medium.com/@vinayprabhu19/merkel-tree-in-java-b45093c8c6bd */ 
+    https://en.wikipedia.org/wiki/Merkle_tree */
 public class MerkleTree {
-    public byte[] calculateMerkleTreeRoot(Transaction[] transactions) {
-        ArrayList<byte[]> transactionHashes = new ArrayList<>();
-        for(Transaction t : transactions) {
-            transactionHashes.add(t.hash());
-        }
-        ArrayList<byte[]> merkleRootHashes = merkleTree(transactionHashes);
+    public byte[] calculateMerkleTreeRoot(Set<byte[]> hashSet) {
+        ArrayList<byte[]> merkleRootHashes = merkleTree(new ArrayList<>(hashSet));
         return merkleRootHashes.get(0); // Return the root
     }
 
+    // Potentially refactor this to an iterative solution if the performance really stinks
     private ArrayList<byte[]> merkleTree(ArrayList<byte[]> hashes) {
         // Return the root if we only have one left
         if(hashes.size() == 1)
             return hashes;
-        
+
+//        System.out.printf("hashes.size(): %d\n", hashes.size());
         ArrayList<byte[]> parentHashList = new ArrayList<>();
         // Hash the leaf transaction pair to get parent transaction
         for(int i=0;i<hashes.size();i+=2) {
-            byte[] hashCombination = Util.concatenateBuffers(hashes.get(i), hashes.get(i+1));
+            int secondEntry = Math.min(i+1, hashes.size()-1);
+//            System.out.printf("%d,%d\n", i, secondEntry);
+            byte[] hashCombination = Util.concatenateBuffers(hashes.get(i), hashes.get(secondEntry));
             parentHashList.add(hashCombination);
-        }
-        // If odd number of transactions, add last transaction again!
-        if(hashes.size() % 2 == 1) {
-            byte[] lastHash = hashes.get(hashes.size()-1);
-            byte[] buffer = Util.concatenateBuffers(lastHash, lastHash);
-            parentHashList.add(buffer);
         }
         return merkleTree(parentHashList);
     }
