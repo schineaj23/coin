@@ -6,7 +6,7 @@ import java.security.Signature;
 
 public class User {
     private KeyPair userKeyPair;
-    private String name;
+    private final String name;
 
     public User(String name) {
         this.name = name;
@@ -63,10 +63,8 @@ public class User {
         byte[] transactionBuffer = Util.hashBuffer(Util.concatenateBuffers(previousTransaction.hash(), otherUser.getPublicKey().getEncoded()));
 
         // Sign this buffer to transfer ownership
-        byte[] transactionSignature = signTransaction(transactionBuffer);
-
         // Add the signature to the transaction then return it
-        transaction.oldOwnerSignature = transactionSignature;
+        transaction.oldOwnerSignature = signTransaction(transactionBuffer);
 
         // Timestamp this transaction (this really should be done by the nodes and not the user itself, refactor this)
         // FIXME: using unix system time again for timestamping. update this so it is recieved by the node listening for it as the timestamp

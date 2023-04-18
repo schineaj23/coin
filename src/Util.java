@@ -21,6 +21,16 @@ public class Util {
         return ret;
     }
 
+    public static boolean bufferEquality(byte[] a, byte[] b) {
+        if(a.length != b.length)
+            return false;
+        for(int i=0;i<a.length;i++) {
+            if(a[i] != b[i])
+                return false;
+        }
+        return true;
+    }
+
     public static byte[] hashBuffer(byte[] buffer) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");

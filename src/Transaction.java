@@ -6,6 +6,9 @@ import java.security.*;
 public class Transaction {
     public PublicKey newOwnerKey;
     public byte[] oldOwnerSignature;
+
+    // TODO: have the timestamp inherit from the block it is being added to. just realized this damn im kinda dumb
+    // at least i think this is how it works???
     public byte[] timestampHash;
     public double amount;
 
