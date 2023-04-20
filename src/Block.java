@@ -5,7 +5,6 @@ import java.util.Optional;
 public class Block {
     private final LinkedHashMap<byte[], Transaction> transactions = new LinkedHashMap<>();
     public byte[] timestampHash;
-
     public byte[] merkleRoot;
 
     // The previous block hash links the blocks together!

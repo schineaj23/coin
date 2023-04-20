@@ -186,6 +186,13 @@ public class Main {
         // https://medium.com/crypto-0-nite/merkle-proofs-explained-6dd429623dc5
         // https://ethereum.org/en/developers/tutorials/merkle-proofs-for-offline-data-integrity/
 
+        // Maybe switch to the account paradigm used by ETH?
+        // https://ethereum.stackexchange.com/questions/10267/how-ethereum-confirm-the-transaction
+        // https://ethereum.org/en/developers/docs/accounts/
+        // https://ethereum.org/en/developers/docs/evm/
+        // The other option is to refactor the Transactions to use inputs and outputs, however implmenting the EVM
+        // May be a more fun idea? not sure yet.
+
         System.out.println("Did it work? idk bobby should now have 0.5");
     }
 }
