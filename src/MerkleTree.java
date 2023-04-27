@@ -1,11 +1,14 @@
 import java.util.ArrayList;
-import java.util.Set;
 
 /*  Resources for this:
     https://en.wikipedia.org/wiki/Merkle_tree */
 public class MerkleTree {
-    public byte[] calculateMerkleTreeRoot(Set<byte[]> hashSet) {
-        ArrayList<byte[]> merkleRootHashes = merkleTree(new ArrayList<>(hashSet));
+    public byte[] calculateMerkleTreeRoot(ArrayList<Transaction> transactionList) {
+        ArrayList<byte[]> transactionHashes = new ArrayList<>(transactionList.size());
+        for(Transaction t : transactionList) {
+            transactionHashes.add(t.hash());
+        }
+        ArrayList<byte[]> merkleRootHashes = merkleTree(transactionHashes);
         return merkleRootHashes.get(0); // Return the root
     }
 

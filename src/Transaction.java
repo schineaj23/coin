@@ -1,44 +1,46 @@
-import java.nio.ByteBuffer;
-import java.security.*;
+import java.util.ArrayList;
 
 // This part is following the Bitcoin spec from the bitcoin white paper (Transactions section)
 // For the moment is mainly just a struct that contains the data for a transaction
-public class Transaction {
-    public PublicKey newOwnerKey;
-    public byte[] oldOwnerSignature;
-
+public class Transaction extends Hashable {
     // TODO: have the timestamp inherit from the block it is being added to. just realized this damn im kinda dumb
     // at least i think this is how it works???
     public byte[] timestampHash;
-    public double amount;
 
-    public byte[] hash() {
-        System.out.println("Transaction::hash() called");
-        int keyLen = newOwnerKey.getEncoded().length;
-        byte[] key = new byte[keyLen + timestampHash.length + oldOwnerSignature.length + 8];
+    private int inputCount = 0;
+    private ArrayList<TransactionInput> inputs = new ArrayList<>();
 
-        // Copy all the data into one array to be hashed
-        System.arraycopy(newOwnerKey.getEncoded(), 0, key, 0, keyLen);
-        System.out.println("Copied newOwnerKey");
+    private int outputCount = 0;
+    private ArrayList<TransactionOutput> outputs = new ArrayList<>();
 
-        System.arraycopy(timestampHash, 0, key, keyLen, timestampHash.length);
-        System.out.println("Copied timeStampHash");
+    public TransactionId getTransactionId() {
+        return new TransactionId(this);
+    }
 
-        System.arraycopy(oldOwnerSignature, 0, key, keyLen + timestampHash.length, oldOwnerSignature.length);
-        System.out.println("Copied oldOwnerSignature");
+    public void addInput(TransactionInput input) {
+        inputs.add(input);
+        inputCount++;
+    }
 
-        byte[] amountBytes = ByteBuffer.allocate(8).putDouble(amount).array();
-        System.arraycopy(amountBytes, 0, key, keyLen + timestampHash.length + oldOwnerSignature.length, 8);
-        System.out.println("Copied amount (bytes representation)");
+    public void addOutput(TransactionOutput output) {
+        outputs.add(output);
+        outputCount++;
+    }
 
-        // Add this all to one array and hash it
-        System.out.println("Hashing transaction");
-        byte[] hashed = Util.hashBuffer(key);
-
-        // If this is null, something went horribly wrong!
-        assert hashed != null;
-
-        System.out.printf("Transaction::hash() result: %s\n", Util.bytesToHex(hashed));
-        return hashed;
+    @Override
+    public String toString() {
+        String ret = String.format("=============START TRANSACTION=============\n");
+        ret += "TXID: " + getTransactionId() + "\n";
+        ret = String.format("=============START INPUTS=============\nInputs: %d\n", inputCount);
+        for(TransactionInput input : inputs) {
+            ret += input + "\n";
+        }
+        ret += String.format("=============END INPUTS=============\n");
+        ret += String.format("=============START OUTPUTS=============\nOutputs: %d\n", outputCount);
+        for(TransactionOutput output : outputs) {
+            ret += output + "\n";
+        }
+        ret += "=============END OUTPUTS=============\n=============END TRANSACTION=============";
+        return ret;
     }
 }

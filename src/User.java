@@ -54,22 +54,23 @@ public class User {
         }
     }
 
-    public Transaction send(Transaction previousTransaction, User otherUser, double amount) {
-        Transaction transaction = new Transaction();
-        // This is our recipient of the funds
-        transaction.newOwnerKey = otherUser.getPublicKey();
-        transaction.amount = amount;
-        // Hash together the previous transaction and new owner public key
-        byte[] transactionBuffer = Util.hashBuffer(Util.concatenateBuffers(previousTransaction.hash(), otherUser.getPublicKey().getEncoded()));
+    // FIXME: implement send by mutating a transaction/using inputs/outputs
+    // public Transaction send(Transaction previousTransaction, User otherUser, double amount) {
+    //     Transaction transaction = new Transaction();
+    //     // This is our recipient of the funds
+    //     transaction.newOwnerKey = otherUser.getPublicKey();
+    //     transaction.amount = amount;
+    //     // Hash together the previous transaction and new owner public key
+    //     byte[] transactionBuffer = Util.hashBuffer(Util.concatenateBuffers(previousTransaction.hash(), otherUser.getPublicKey().getEncoded()));
 
-        // Sign this buffer to transfer ownership
-        // Add the signature to the transaction then return it
-        transaction.oldOwnerSignature = signTransaction(transactionBuffer);
+    //     // Sign this buffer to transfer ownership
+    //     // Add the signature to the transaction then return it
+    //     transaction.oldOwnerSignature = signTransaction(transactionBuffer);
 
-        // Timestamp this transaction (this really should be done by the nodes and not the user itself, refactor this)
-        // FIXME: using unix system time again for timestamping. update this so it is recieved by the node listening for it as the timestamp
-        transaction.timestampHash = Util.hashBuffer(ByteBuffer.allocate(8).putLong(System.currentTimeMillis()).array());
+    //     // Timestamp this transaction (this really should be done by the nodes and not the user itself, refactor this)
+    //     // FIXME: using unix system time again for timestamping. update this so it is recieved by the node listening for it as the timestamp
+    //     transaction.timestampHash = Util.hashBuffer(ByteBuffer.allocate(8).putLong(System.currentTimeMillis()).array());
     
-        return transaction;
-    }
+    //     return transaction;
+    // }
 }
