@@ -25,7 +25,7 @@ public class MerkleTree {
             int secondEntry = Math.min(i+1, hashes.size()-1);
 //            System.out.printf("%d,%d\n", i, secondEntry);
             byte[] hashCombination = Util.concatenateBuffers(hashes.get(i), hashes.get(secondEntry));
-            parentHashList.add(hashCombination);
+            parentHashList.add(Util.hashBuffer(hashCombination));
         }
         return merkleTree(parentHashList);
     }

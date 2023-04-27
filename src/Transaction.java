@@ -40,7 +40,7 @@ public class Transaction extends Hashable {
         for(TransactionOutput output : outputs) {
             ret += output + "\n";
         }
-        ret += "=============END OUTPUTS=============\n=============END TRANSACTION=============";
+        ret += "=============END OUTPUTS=============\n=============END TRANSACTION=============\n";
         return ret;
     }
 }

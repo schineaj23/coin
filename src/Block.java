@@ -19,17 +19,17 @@ public class Block extends Hashable {
         transactions.add(initialTransaction);
     }
 
-    public boolean addTransaction(Transaction t) {
+    public void addTransaction(Transaction t) {
         transactions.add(t);
-        return true;
     }
 
-    public boolean contains(TransactionId a) {
-        for(Transaction b : transactions) {
-            if(a.compareTo(b.getTransactionId()) == 0)
-                return true;
+    // Returns the index of the transaction for transactionId if exists. Returns -1 if it does not exist.
+    public int indexOf(TransactionId a) {
+        for(int i=0;i<transactions.size();i++) {
+            if(a.compareTo(transactions.get(i).getTransactionId()) == 0)
+                return i;
         }
-        return false;
+        return -1;
     }
 
     public Transaction getRootTransaction() {
@@ -45,16 +45,16 @@ public class Block extends Hashable {
         timestampHash = Util.hashBuffer(ByteBuffer.allocate(8).putLong(System.currentTimeMillis()).array());
     }
 
+    @Override
     public byte[] hash() {
         // Before hashing the entire object, calculate our merkle root
         MerkleTree merkleTree = new MerkleTree();
-        byte[] root = merkleTree.calculateMerkleTreeRoot(transactions);
-        merkleRoot = root;
+        merkleRoot = merkleTree.calculateMerkleTreeRoot(transactions);
 
-        // Ok, now hash the entire object + the nonce
-        byte[] hashedObject = super.hash();
-        assert hashedObject != null;
-        return Util.hashBuffer(Util.concatenateBuffers(hashedObject, ByteBuffer.allocate(4).putInt(nonce).array()));
+        // Ok, now hash the entire header + the nonce
+        byte[] hashedHeader = Util.hashBuffer(Util.concatenateBuffers(Util.concatenateBuffers(merkleRoot, timestampHash),previousBlockHash));
+        assert hashedHeader != null;
+        return Util.hashBuffer(Util.concatenateBuffers(hashedHeader, ByteBuffer.allocate(4).putInt(nonce).array()));
     }
 
     @Override

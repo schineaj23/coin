@@ -114,6 +114,16 @@ public class Main {
         return output;
     }
 
+    private static ArrayList<Block> savedBlocks = new ArrayList<>();
+
+    public static Block findBlockForTransaction(TransactionId transactionId) {
+        for(Block b : savedBlocks) {
+            if(b.indexOf(transactionId) != -1)
+                return b;
+        }
+        return null;
+    }
+
     public static void main(String[] args) throws NoSuchAlgorithmException {
         KeyPair GOD_KEY_PAIR = KeyPairGenerator.getInstance("RSA").generateKeyPair();
         ArrayList<Block> blocks = new ArrayList<>();
@@ -121,7 +131,7 @@ public class Main {
         User bobby = new User("bobby");
         User larry = new User("larry");
         User jimmy = new User("jimmy");
-        
+
         // Transaction which contains a few shenanigans!
         // Mint a coin for bobby
         Transaction mintTransaction = new Transaction();
@@ -143,7 +153,7 @@ public class Main {
         // now let's send some to our friends!
         funnyTransaction.addOutput(new TransactionOutput(0.5, larry.getPublicKey().getEncoded()));
         funnyTransaction.addOutput(new TransactionOutput(0.2, jimmy.getPublicKey().getEncoded()));
-        
+
         // We gave some coins to others, but to update our OWN wallet and ensure not a double-spend, collect our change!
         // TODO: implement full UTXO (unspent transaction output) logic
         funnyTransaction.addOutput(new TransactionOutput(0.3, bobby.getPublicKey().getEncoded()));
@@ -158,34 +168,7 @@ public class Main {
         testBlock.previousBlockHash = new byte[] {0x00, 0x01};
         testBlock.timestampHash = Util.hashBuffer(ByteBuffer.allocate(8).putLong(System.currentTimeMillis()).array());
         System.out.println(testBlock);
-
-        // Have bobby send jimmy some moneys
-        // Transaction prevTransaction = mintTransaction;
-        // for(int i=0;i<5;i++) {
-        //     System.out.println(i);
-        //     prevTransaction = bobby.send(prevTransaction, jimmy, 0.5);
-        //     testBlock.addTransaction(prevTransaction);
-        // }
-        // testBlock.timestamp();
-        // testBlock.previousBlockHash = new byte[]{0,0,0,0,0,0}; // zero this out for now
-        // System.out.println("testBlock " + testBlock);
-
-        // // Create a block to put our transactions into!
-        // Block secondBlock = new Block(mintCoinDebug(jimmy, 1));
-        // secondBlock.previousBlockHash = testBlock.hash();
-
-        // // Have bobby send jimmy some moneys
-        // Transaction pt = secondBlock.getRootTransaction().get();
-        // for(int i=0;i<5;i++) {
-        //     System.out.println(i);
-        //     pt = jimmy.send(pt, bobby, 0.5);
-        //     secondBlock.addTransaction(pt);
-        // }
-        // secondBlock.timestamp();
-        // System.out.println("secondBlock " + secondBlock);
-
-        // blocks.add(testBlock);
-        // blocks.add(secondBlock);
+        savedBlocks.add(testBlock);
 
         // TODO: Payment verification process
         // 1. have transaction object that we want to get
