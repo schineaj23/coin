@@ -1,4 +1,7 @@
 package asch.coin;
+
+import java.nio.ByteBuffer;
+
 public class TransactionOutput extends Hashable {
     public TransactionOutput() {}
 
@@ -19,5 +22,20 @@ public class TransactionOutput extends Hashable {
                 DestinationPublicKeySize: %d
                 DestinationPublicKey: %s
                 """, amount, destinationPublicKeySize, Util.bytesToHex(destinationPublicKey));
+    }
+
+    @Override
+    public int getSerializedSize() {
+        // amount (double, 8 bytes) + publicKeySize (int, 4 bytes) + publicKey (publicKeySize bytes)
+        return 8 + 4 + destinationPublicKeySize;
+    }
+
+    @Override
+    public ByteBuffer serialize() {
+        ByteBuffer buffer = ByteBuffer.allocate(getSerializedSize());
+        buffer.putDouble(amount);
+        buffer.putInt(destinationPublicKeySize);
+        buffer.put(destinationPublicKey);
+        return buffer;
     }
 }

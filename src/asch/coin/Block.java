@@ -1,5 +1,4 @@
 package asch.coin;
-import asch.coin.tree.MerkleNode;
 import asch.coin.tree.MerkleTree;
 
 import java.nio.ByteBuffer;
@@ -7,7 +6,10 @@ import java.util.ArrayList;
 
 public class Block extends Hashable {
     private final ArrayList<Transaction> transactions = new ArrayList<>();
+
     public byte[] timestampHash;
+    private int timestamp; // this is internal to the class
+
     public byte[] merkleRoot;
 
     // The previous block hash links the blocks together!
@@ -45,25 +47,63 @@ public class Block extends Hashable {
     }
 
     // FIXME: timestamp bug
-    public void timestamp() {
-        timestampHash = Util.hashBuffer(ByteBuffer.allocate(8).putLong(System.currentTimeMillis()).array());
+    public void generateTimestamp() {
+        // Yes, I do realize that this loses precision, doesn't really matter though it's MY CURRENCY, MY AMERICA!
+        timestamp = (int)(System.currentTimeMillis() / 1000L);
+        timestampHash = Util.hashBuffer(ByteBuffer.allocate(8).putLong(timestamp).array());
+    }
+
+    public ByteBuffer getBlockHeader() {
+        if(merkleRoot == null) {
+            merkleRoot = new MerkleTree().generateTree(transactions).hash();
+        }
+        
+        if(timestampHash == null) {
+            generateTimestamp();
+        }
+
+        int transactionsSize = getTransactionsSerializedSize();
+
+        // previousBlock (32 bytes) + merkleRoot (32 bytes) 
+        // + timestamp (4 bytes) + size (4 bytes) + nonce (4 bytes) = 76 bytes
+        ByteBuffer buffer = ByteBuffer.allocate(32 + 32 + 4 + 4 + 4);
+        buffer.put(previousBlockHash).put(merkleRoot);
+        buffer.putInt(timestamp).putInt(transactionsSize).putInt(nonce);
+
+        return buffer;
     }
 
     @Override
     public byte[] hash() {
-        // Before hashing the entire object, calculate our merkle root
-        MerkleTree tree = new MerkleTree();
-        MerkleNode parentNode = tree.generateTree(transactions);
-        System.out.printf("serialized merkletree: %s\n", Util.bytesToHex(tree.serializeTree()));
-        merkleRoot = parentNode.getHash();
+        // Block Hash = hash(hash(block header))
+        // Similar to how transactionId = hash(hash(transaction))
+        return Util.hashBuffer(Util.hashBuffer(getBlockHeader().array()));
+    }
 
-        // Ok, now hash the entire header + the nonce
-        if(timestampHash == null) {
-            timestamp();
+    private int getTransactionsSerializedSize() {
+        int transactionsSize = 0;
+        for(Transaction t : transactions) {
+            transactionsSize += t.getSerializedSize();
         }
-        byte[] hashedHeader = Util.hashBuffer(Util.concatenateBuffers(Util.concatenateBuffers(merkleRoot, timestampHash),previousBlockHash));
-        assert hashedHeader != null;
-        return Util.hashBuffer(Util.concatenateBuffers(hashedHeader, ByteBuffer.allocate(4).putInt(nonce).array()));
+        // Hopefully there aren't so many transactions such that we overflow! (surely)
+        return transactionsSize;
+    }
+
+    @Override
+    public int getSerializedSize() {
+        // Size = header (76 bytes) + transactions (transactionSize bytes)
+        int transactionSize = getTransactionsSerializedSize();
+        return 76 + transactionSize;
+    }
+
+    @Override
+    public ByteBuffer serialize() {
+        ByteBuffer buffer = ByteBuffer.allocate(getSerializedSize());
+        buffer.put(getBlockHeader());
+        for(Transaction t : transactions) {
+            buffer.put(t.serialize());
+        }
+        return buffer;
     }
 
     @Override

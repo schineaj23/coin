@@ -8,6 +8,10 @@ public class TransactionId implements Serializable, Comparable<TransactionId> {
     public TransactionId(Transaction transaction) {
         bufferInternal = Util.hashBuffer(transaction.hash());
     }
+
+    public byte[] get() {
+        return bufferInternal;
+    }
     
     @Override
     public int compareTo(TransactionId other) {

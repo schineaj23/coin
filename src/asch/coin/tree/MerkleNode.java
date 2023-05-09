@@ -1,7 +1,9 @@
 package asch.coin.tree;
 import java.nio.ByteBuffer;
 
-public class MerkleNode {
+import asch.coin.Hashable;
+
+public class MerkleNode extends Hashable {
     private byte[] hash;
     private MerkleNode left;
     private MerkleNode right;
@@ -32,18 +34,26 @@ public class MerkleNode {
         this.hash = hash;
     }
 
-    public byte[] getHash() {
-        return hash;
-    }
-
     public boolean isLeaf() {
         return left == null && right == null;
     }
 
-    public byte[] serialize() {
+    @Override
+    public byte[] hash() {
+        return hash;
+    }
+
+    @Override
+    public int getSerializedSize() {
+        // Head (2 bytes) + Length (4 bytes, int) + Hash (32 bytes)
+        return 2 + 4 + 32;
+    }
+
+    @Override
+    public ByteBuffer serialize() {
         System.out.println("Node hash length: " + hash.length);
-        ByteBuffer byteBuffer = ByteBuffer.allocate(2 + 4 + 32);
-        // This is a leaf
+        ByteBuffer byteBuffer = ByteBuffer.allocate(getSerializedSize());
+        // Leaf has a different head (0xFEFE)
         if(isLeaf()) {
             byte[] LEAF_HEAD = {(byte)0xFE, (byte)0xFE};
             byteBuffer.put(LEAF_HEAD);
@@ -53,6 +63,6 @@ public class MerkleNode {
         }
         byteBuffer.putInt(hash.length);
         byteBuffer.put(hash);
-        return byteBuffer.array();
+        return byteBuffer;
     }
 }

@@ -1,4 +1,5 @@
 package asch.coin.tree;
+import asch.coin.Hashable;
 import asch.coin.Transaction;
 import asch.coin.Util;
 
@@ -11,7 +12,7 @@ import java.util.ArrayList;
     Shamelessly stole code from: https://www.pranaybathini.com/2021/05/merkle-tree.html
     https://github.com/quux00/merkle-tree/blob/master/README.md
     */
-public class MerkleTree {
+public class MerkleTree extends Hashable {
     private int numNodes = 0;
     private MerkleNode parentNode;
 
@@ -33,9 +34,9 @@ public class MerkleTree {
                 if((index + 1) < length) {
                     rightChild = children.get(index + 1);
                 } else {
-                    rightChild = new MerkleNode(null, null, leftChild.getHash());
+                    rightChild = new MerkleNode(null, null, leftChild.hash());
                 }
-                byte[] parentHash = Util.hashBuffer(Util.concatenateBuffers(leftChild.getHash(), rightChild.getHash()));
+                byte[] parentHash = Util.hashBuffer(Util.concatenateBuffers(leftChild.hash(), rightChild.hash()));
                 parents.add(new MerkleNode(leftChild, rightChild, parentHash));
                 index += 2;
                 numNodes += 3; // The parent node + 2 children nodes (even if their contents are null)
@@ -48,30 +49,44 @@ public class MerkleTree {
         return children.get(0);
     }
 
-    public byte[] serializeTree() {
+    @Override
+    public byte[] hash() {
+        if(parentNode == null) {
+            throw new RuntimeException("Cannot hash() merkleTree, parentNode is null!");
+        }
+        return parentNode.hash();
+    }
+
+    @Override
+    public int getSerializedSize() {
+        // 0xDEAD (2 bytes for header) 4 bytes (length, int)
+        // 2 byte (type, byte) 4 bytes (length, int) 32 bytes (hash, byte) = 38 per node
+        return numNodes * (2 + 4 + 32) + 4 + 2;
+    }
+
+    @Override
+    public ByteBuffer serialize() {
         ArrayDeque<MerkleNode> queue = new ArrayDeque<>(numNodes / 2 + 1);
         if(parentNode == null) {
             System.out.println("MerkleTree::serializeTree() parent node == null!");
             return null;
         }
         queue.add(parentNode);
-        // 0xDEAD (2 bytes for header) 4 bytes (length, int)
-        // 2 byte (type, byte) 4 bytes (length, int) 32 bytes (hash, byte) = 38 per node
-        ByteBuffer buf = ByteBuffer.allocate(numNodes * (2 + 4 + 32) + 4 + 2);
+        ByteBuffer buf = ByteBuffer.allocate(getSerializedSize());
         System.out.println("buffer limit " + buf.limit());
         buf.put((byte)0xDE);
         buf.put((byte)0xAD);
         buf.putInt(numNodes);
         while(!queue.isEmpty()) {
             MerkleNode node = queue.remove();
-            byte[] serialized = node.serialize();
-            System.out.println(serialized.length);
+            ByteBuffer serialized = node.serialize();
+            // System.out.println(serialized.limit());
             buf.put(serialized);
             if(node.getLeft() != null)
                 queue.add(node.getLeft());
             if(node.getRight() != null)
                 queue.add(node.getRight());
         }
-        return buf.array();
+        return buf;
     }
 }

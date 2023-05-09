@@ -3,6 +3,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 
 public abstract class Hashable implements Serializable {
     // Convert the entire object to a byte array then hash it!
@@ -23,4 +24,7 @@ public abstract class Hashable implements Serializable {
         }
         return null;
     }
+
+    public abstract int getSerializedSize();
+    public abstract ByteBuffer serialize();
 }
