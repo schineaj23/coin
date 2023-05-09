@@ -1,3 +1,4 @@
+package asch.coin;
 import java.nio.ByteBuffer;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
