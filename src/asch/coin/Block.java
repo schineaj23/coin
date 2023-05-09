@@ -1,4 +1,7 @@
 package asch.coin;
+import asch.coin.tree.MerkleNode;
+import asch.coin.tree.MerkleTree;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
@@ -49,10 +52,15 @@ public class Block extends Hashable {
     @Override
     public byte[] hash() {
         // Before hashing the entire object, calculate our merkle root
-        MerkleTree merkleTree = new MerkleTree();
-        merkleRoot = merkleTree.calculateMerkleTreeRoot(transactions);
+        MerkleTree tree = new MerkleTree();
+        MerkleNode parentNode = tree.generateTree(transactions);
+        System.out.printf("serialized merkletree: %s\n", Util.bytesToHex(tree.serializeTree()));
+        merkleRoot = parentNode.getHash();
 
         // Ok, now hash the entire header + the nonce
+        if(timestampHash == null) {
+            timestamp();
+        }
         byte[] hashedHeader = Util.hashBuffer(Util.concatenateBuffers(Util.concatenateBuffers(merkleRoot, timestampHash),previousBlockHash));
         assert hashedHeader != null;
         return Util.hashBuffer(Util.concatenateBuffers(hashedHeader, ByteBuffer.allocate(4).putInt(nonce).array()));
