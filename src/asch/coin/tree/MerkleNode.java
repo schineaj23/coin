@@ -4,6 +4,6 @@ import asch.coin.Hashable;
 
 public class MerkleNode extends Hashable {
     byte[] hash;
-    MerkleElement left;
-    MerkleElement right;
+    MerkleNode left;
+    MerkleNode right;
 }

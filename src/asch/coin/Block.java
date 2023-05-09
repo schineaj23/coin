@@ -1,3 +1,4 @@
+package asch.coin;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 

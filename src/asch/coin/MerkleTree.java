@@ -1,3 +1,4 @@
+package asch.coin;
 import java.util.ArrayList;
 
 /*  Resources for this:

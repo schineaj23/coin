@@ -1,3 +1,4 @@
+package asch.coin;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 

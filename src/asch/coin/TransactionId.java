@@ -1,3 +1,4 @@
+package asch.coin;
 import java.io.Serializable;
 
 // Wraps the TXID in an object so that it's not just a byte buffer which may get messed up

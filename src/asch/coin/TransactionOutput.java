@@ -1,3 +1,4 @@
+package asch.coin;
 public class TransactionOutput extends Hashable {
     public TransactionOutput() {}
 

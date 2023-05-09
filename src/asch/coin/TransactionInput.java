@@ -1,3 +1,4 @@
+package asch.coin;
 // The transaction "input" in essence is a reference to a previous output
 // Such that you could trace back an input to an output statement from the block in which it was mined!
 public class TransactionInput extends Hashable {

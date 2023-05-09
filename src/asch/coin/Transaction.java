@@ -1,3 +1,4 @@
+package asch.coin;
 import java.util.ArrayList;
 
 // This part is following the Bitcoin spec from the bitcoin white paper (Transactions section)
