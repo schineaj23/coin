@@ -22,4 +22,12 @@ public class TransactionId implements Serializable, Comparable<TransactionId> {
     public String toString() {
         return Util.bytesToHex(bufferInternal);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof TransactionId) {
+            return Util.bufferEquality(bufferInternal, ((TransactionId)obj).bufferInternal);
+        }
+        return obj == this;
+    }
 }

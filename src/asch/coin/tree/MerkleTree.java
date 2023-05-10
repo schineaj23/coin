@@ -6,6 +6,7 @@ import asch.coin.Util;
 import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 
 /*  Resources for this:
     https://en.wikipedia.org/wiki/Merkle_tree
@@ -13,10 +14,11 @@ import java.util.ArrayList;
     https://github.com/quux00/merkle-tree/blob/master/README.md
     */
 public class MerkleTree extends Hashable {
+    private static byte[] TREE_HEAD = {(byte)0xDE, (byte)0xAD};
     private int numNodes = 0;
     private MerkleNode parentNode;
 
-    public MerkleNode generateTree(ArrayList<Transaction> transactionList) {
+    public MerkleNode generateTree(Collection<Transaction> transactionList) {
         ArrayList<MerkleNode> nodes = new ArrayList<>();
         for(Transaction t : transactionList) {
             nodes.add(new MerkleNode(null, null, t.hash()));
@@ -74,8 +76,7 @@ public class MerkleTree extends Hashable {
         queue.add(parentNode);
         ByteBuffer buf = ByteBuffer.allocate(getSerializedSize());
         System.out.println("buffer limit " + buf.limit());
-        buf.put((byte)0xDE);
-        buf.put((byte)0xAD);
+        buf.put(TREE_HEAD);
         buf.putInt(numNodes);
         while(!queue.isEmpty()) {
             MerkleNode node = queue.remove();
@@ -88,5 +89,15 @@ public class MerkleTree extends Hashable {
                 queue.add(node.getRight());
         }
         return buf;
+    }
+
+    // TODO: implement this entirely
+    public static boolean deserialize(ByteBuffer serializedTree, MerkleNode outParentNode) {
+        byte[] head = new byte[2];
+        serializedTree.get(0, head, 0, 2);
+        if(!Util.bufferEquality(TREE_HEAD, head))
+            return false;
+        
+        return true;
     }
 }

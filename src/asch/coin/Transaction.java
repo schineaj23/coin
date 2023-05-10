@@ -1,14 +1,12 @@
 package asch.coin;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 // This part is following the Bitcoin spec from the bitcoin white paper (Transactions section)
 // For the moment is mainly just a struct that contains the data for a transaction
 public class Transaction extends Hashable {
-    // TODO: have the timestamp inherit from the block it is being added to. just realized this damn im kinda dumb
-    // at least i think this is how it works???
-    public byte[] timestampHash;
-
     private ArrayList<TransactionInput> inputs = new ArrayList<>();
 
     private ArrayList<TransactionOutput> outputs = new ArrayList<>();
@@ -23,6 +21,12 @@ public class Transaction extends Hashable {
 
     public void addOutput(TransactionOutput output) {
         outputs.add(output);
+    }
+
+    // Ensure that the inputs we get CANNOT be modified. 
+    // We wouldn't want to accidentally mess up the transaction
+    public Collection<TransactionInput> getInputs() {
+        return Collections.unmodifiableList(inputs);
     }
 
     @Override

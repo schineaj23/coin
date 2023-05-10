@@ -2,10 +2,10 @@ package asch.coin;
 import asch.coin.tree.MerkleTree;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
+import java.util.TreeMap;
 
 public class Block extends Hashable {
-    private final ArrayList<Transaction> transactions = new ArrayList<>();
+    private final TreeMap<TransactionId, Transaction> transactions = new TreeMap<>();
 
     public byte[] timestampHash;
     private int timestamp; // this is internal to the class
@@ -22,28 +22,19 @@ public class Block extends Hashable {
     // Why are we creating a block if we don't have an initial transaction?
     public Block(Transaction initialTransaction) {
         assert initialTransaction != null;
-        transactions.add(initialTransaction);
+        transactions.put(initialTransaction.getTransactionId(), initialTransaction);
     }
 
     public void addTransaction(Transaction t) {
-        transactions.add(t);
+        transactions.put(t.getTransactionId(), t);
     }
 
-    // Returns the index of the transaction for transactionId if exists. Returns -1 if it does not exist.
-    public int indexOf(TransactionId a) {
-        for(int i=0;i<transactions.size();i++) {
-            if(a.compareTo(transactions.get(i).getTransactionId()) == 0)
-                return i;
-        }
-        return -1;
+    public boolean contains(TransactionId id) {
+        return transactions.containsKey(id);
     }
 
-    public Transaction getRootTransaction() {
-        if(transactions.size() < 1) {
-            System.out.println("Block::getRootTransaction(): transactions empty!");
-            return null;
-        }
-        return transactions.get(0);
+    public Transaction getTransactionById(TransactionId id) {
+        return transactions.get(id);
     }
 
     // FIXME: timestamp bug
@@ -55,7 +46,7 @@ public class Block extends Hashable {
 
     public ByteBuffer getBlockHeader() {
         if(merkleRoot == null) {
-            merkleRoot = new MerkleTree().generateTree(transactions).hash();
+            merkleRoot = new MerkleTree().generateTree(transactions.values()).hash();
         }
         
         if(timestampHash == null) {
@@ -82,7 +73,7 @@ public class Block extends Hashable {
 
     private int getTransactionsSerializedSize() {
         int transactionsSize = 0;
-        for(Transaction t : transactions) {
+        for(Transaction t : transactions.values()) {
             transactionsSize += t.getSerializedSize();
         }
         // Hopefully there aren't so many transactions such that we overflow! (surely)
@@ -100,7 +91,7 @@ public class Block extends Hashable {
     public ByteBuffer serialize() {
         ByteBuffer buffer = ByteBuffer.allocate(getSerializedSize());
         buffer.put(getBlockHeader());
-        for(Transaction t : transactions) {
+        for(Transaction t : transactions.values()) {
             buffer.put(t.serialize());
         }
         return buffer;
@@ -109,7 +100,7 @@ public class Block extends Hashable {
     @Override
     public String toString() {
         String trans = "\n";
-        for(Transaction t : transactions) {
+        for(Transaction t : transactions.values()) {
             trans += t;
         }
 

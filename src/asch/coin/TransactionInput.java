@@ -7,15 +7,15 @@ import java.nio.ByteBuffer;
 public class TransactionInput extends Hashable {
     public TransactionInput() {}
 
-    public TransactionInput(TransactionId associatedTransaction, int associatedOutput, byte[] signature) {
-        this.associatedTransaction = associatedTransaction;
-        this.associatedOutput = associatedOutput;
+    public TransactionInput(TransactionId previousTransaction, int associatedOutput, byte[] signature) {
+        this.previousTransaction = previousTransaction;
+        this.previousOutput = associatedOutput;
         this.signatureSize = signature.length;
         this.signature = signature;
     }
 
-    TransactionId associatedTransaction;
-    int associatedOutput; // Index of the output from the previous transaction (used for verification) 
+    TransactionId previousTransaction;
+    int previousOutput; // Index of the output from the previous transaction (used for verification) 
     int signatureSize;
     byte[] signature; // Signature used to verify the transaction so ownership can be transferred
 
@@ -26,7 +26,7 @@ public class TransactionInput extends Hashable {
                 PreviousTransactionOutput: %d
                 SignatureSize: %d
                 Signature: %s
-                """, associatedTransaction, associatedOutput, signatureSize, Util.bytesToHex(signature));
+                """, previousTransaction, previousOutput, signatureSize, Util.bytesToHex(signature));
     }
 
     @Override
@@ -39,8 +39,8 @@ public class TransactionInput extends Hashable {
     @Override
     public ByteBuffer serialize() {
         ByteBuffer buffer = ByteBuffer.allocate(getSerializedSize());
-        buffer.put(associatedTransaction.get());
-        buffer.putInt(associatedOutput).putInt(signatureSize);
+        buffer.put(previousTransaction.get());
+        buffer.putInt(previousOutput).putInt(signatureSize);
         buffer.put(signature);
         return buffer;
     }

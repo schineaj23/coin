@@ -109,7 +109,7 @@ public class Main {
     // }
 
     // Debug function to give coins to someone, remove this when the network is really working
-    public static TransactionOutput mintCoinDebug(User recipient, double amount) {
+    public static TransactionOutput mintCoinDebug(Wallet recipient, double amount) {
         System.out.printf("Attempting to mint %.2f coins for user %s\n", amount, recipient.getName());
         TransactionOutput output = new TransactionOutput(amount, recipient.getPublicKey().getEncoded());
         return output;
@@ -117,21 +117,27 @@ public class Main {
 
     private static ArrayList<Block> savedBlocks = new ArrayList<>();
 
-    public static Block findBlockForTransaction(TransactionId transactionId) {
-        for(Block b : savedBlocks) {
-            if(b.indexOf(transactionId) != -1)
-                return b;
+    public static boolean isTransactionOutputSpent(ArrayList<Block> blockchain, TransactionId transactionId, int outputId) {
+        for(Block block : blockchain) {
+            if(!block.contains(transactionId))
+                continue;
+            Transaction transaction = block.getTransactionById(transactionId);
+            for(TransactionInput input : transaction.getInputs()) {
+                // If there exists a transaction already with the output listed, then it is for sure spent
+                if(input.previousOutput == outputId)
+                    return true;
+            }
         }
-        return null;
+        return false;
     }
 
     public static void main(String[] args) throws NoSuchAlgorithmException {
         KeyPair GOD_KEY_PAIR = KeyPairGenerator.getInstance("RSA").generateKeyPair();
         ArrayList<Block> blocks = new ArrayList<>();
 
-        User bobby = new User("bobby");
-        User larry = new User("larry");
-        User jimmy = new User("jimmy");
+        Wallet bobby = new Wallet("bobby");
+        Wallet larry = new Wallet("larry");
+        Wallet jimmy = new Wallet("jimmy");
 
         // Transaction which contains a few shenanigans!
         // Mint a coin for bobby
@@ -143,14 +149,12 @@ public class Main {
 
         // Our only input to this transaction will be the mint transaction!
         TransactionInput mintTransactionInput = new TransactionInput();
-        mintTransactionInput.associatedTransaction = mintTransaction.getTransactionId();
-        mintTransactionInput.associatedOutput = 0;
+        mintTransactionInput.previousTransaction = mintTransaction.getTransactionId();
+        mintTransactionInput.previousOutput = 0;
         mintTransactionInput.signature = new byte[] {0x00, 0x01}; // we dont gaf about SIGNATURES rn
         mintTransactionInput.signatureSize = 2;
 
         mintTransaction.addInput(mintTransactionInput);
-        mintTransaction.timestampHash = Util.hashBuffer(ByteBuffer.allocate(8).putLong(System.currentTimeMillis()).array());
-
         // now let's send some to our friends!
         funnyTransaction.addOutput(new TransactionOutput(0.5, larry.getPublicKey().getEncoded()));
         funnyTransaction.addOutput(new TransactionOutput(0.2, jimmy.getPublicKey().getEncoded()));
@@ -158,7 +162,6 @@ public class Main {
         // We gave some coins to others, but to update our OWN wallet and ensure not a double-spend, collect our change!
         // TODO: implement full UTXO (unspent transaction output) logic
         funnyTransaction.addOutput(new TransactionOutput(0.3, bobby.getPublicKey().getEncoded()));
-        funnyTransaction.timestampHash = Util.hashBuffer(ByteBuffer.allocate(8).putLong(System.currentTimeMillis()).array());
         // okay now let's add our funny transactions to the block and see what happens!
 
         // Create a block to put our transactions into!
@@ -190,5 +193,8 @@ public class Main {
         // May be a more fun idea? not sure yet.
 
         System.out.println("Did it work? idk bobby should now have 0.5");
+        System.out.println("Now checking the nonce for testBlock. Let's see how long this takes");
+        
+        Proof.hashUntilValid(testBlock);
     }
 }
