@@ -1,8 +1,8 @@
-package asch.coin.tree;
+package com.asch.coin.tree;
 
 import java.nio.ByteBuffer;
 
-import asch.coin.Hashable;
+import com.asch.coin.Hashable;
 
 public class MerkleNode extends Hashable {
     private byte[] hash;

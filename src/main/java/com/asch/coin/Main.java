@@ -1,9 +1,22 @@
-package asch.coin;
+package com.asch.coin;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.*;
+import java.util.Objects;
+import java.util.Scanner;
 
-public class Main {
+public class Main extends Application {
+    static Wallet bobby = new Wallet("bobby");
+    static Wallet larry = new Wallet("larry");
+    static Wallet jimmy = new Wallet("jimmy");
     public static Transaction createCoinbaseTransaction(Wallet recipient, double amount) {
         Transaction transaction = new Transaction();
         TransactionInput input = new TransactionInput(new TransactionId(), 0xFFFFFFFF,
@@ -19,11 +32,7 @@ public class Main {
         return transaction;
     }
 
-    public static void main(String[] args) throws NoSuchAlgorithmException, InterruptedException {
-        Wallet bobby = new Wallet("bobby");
-        Wallet larry = new Wallet("larry");
-        Wallet jimmy = new Wallet("jimmy");
-
+    public static void test() {
         // Transaction which contains a few shenanigans!
         // Mint a coin for bobby
         Transaction coinbaseTransaction = createCoinbaseTransaction(bobby, 2);
@@ -67,5 +76,25 @@ public class Main {
         // Ensure that bobby has the correct balance as well
         bobby.rebuildWallet();
         larry.rebuildWallet();
+    }
+
+    public static void main(String[] args) throws NoSuchAlgorithmException, InterruptedException {
+        test();
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getResource("layout.fxml")));
+        Parent root = loader.load();
+        primaryStage.setTitle("DrewCoin");
+        primaryStage.setScene(new Scene(root));
+        primaryStage.setResizable(false);
+        UIController controller = loader.getController();
+        primaryStage.setOnHidden(e -> {
+            controller.shutdown();
+            Platform.exit();
+        });
+        primaryStage.show();
     }
 }

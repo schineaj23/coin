@@ -1,4 +1,4 @@
-package asch.coin;
+package com.asch.coin;
 
 // This structure is used only by the wallet to keep track of itself
 public class UnspentTransactionOutput implements Comparable<UnspentTransactionOutput> {

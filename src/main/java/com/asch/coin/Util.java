@@ -1,4 +1,4 @@
-package asch.coin;
+package com.asch.coin;
 
 import java.security.KeyFactory;
 import java.security.MessageDigest;

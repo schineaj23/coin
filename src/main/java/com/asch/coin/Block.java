@@ -1,6 +1,6 @@
-package asch.coin;
+package com.asch.coin;
 
-import asch.coin.tree.MerkleTree;
+import com.asch.coin.tree.MerkleTree;
 
 import java.nio.ByteBuffer;
 import java.util.Collection;

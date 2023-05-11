@@ -1,4 +1,4 @@
-package asch.coin;
+package com.asch.coin;
 
 // This contains all verification mechanisms for blocks
 public class Proof {
