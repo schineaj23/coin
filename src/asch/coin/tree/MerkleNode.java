@@ -1,4 +1,5 @@
 package asch.coin.tree;
+
 import java.nio.ByteBuffer;
 
 import asch.coin.Hashable;
@@ -54,11 +55,11 @@ public class MerkleNode extends Hashable {
         System.out.println("Node hash length: " + hash.length);
         ByteBuffer byteBuffer = ByteBuffer.allocate(getSerializedSize());
         // Leaf has a different head (0xFEFE)
-        if(isLeaf()) {
-            byte[] LEAF_HEAD = {(byte)0xFE, (byte)0xFE};
+        if (isLeaf()) {
+            byte[] LEAF_HEAD = { (byte) 0xFE, (byte) 0xFE };
             byteBuffer.put(LEAF_HEAD);
         } else {
-            byte[] NODE_HEAD = {(byte)0xBE, (byte)0xAD};
+            byte[] NODE_HEAD = { (byte) 0xBE, (byte) 0xAD };
             byteBuffer.put(NODE_HEAD);
         }
         byteBuffer.putInt(hash.length);

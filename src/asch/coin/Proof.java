@@ -8,14 +8,15 @@ public class Proof {
     // This "work" is the amount
     public static boolean isBlockValid(Block block) {
         byte[] blockHash = block.hash();
-        for(int i=0;i<NUM_ZEROS;i++) {
-            if(blockHash[i] != 0) {
+        for (int i = 0; i < NUM_ZEROS; i++) {
+            if (blockHash[i] != 0) {
                 // Prints take up a lot of time. This should not run other than debugging!
-                // System.out.printf("Block INVALID: %s Nonce: %d\n", Util.bytesToHex(blockHash), block.nonce);
+                // System.out.printf("Block INVALID: %s Nonce: %d\n",
+                // Util.bytesToHex(blockHash), block.nonce);
                 return false;
             }
         }
-        System.out.printf("Block Valid: %s\nNonce: %d\n", Util.bytesToHex(blockHash), block.nonce);
+        // System.out.printf("Block Valid: %s\nNonce: %d\n", Util.bytesToHex(blockHash), block.nonce);
         return true;
     }
 
@@ -24,11 +25,12 @@ public class Proof {
     public static int hashUntilValid(Block block) {
         System.out.printf("Proof::hashUntilValid() started for block: %s\n", Util.bytesToHex(block.hash()));
         long startTime = System.currentTimeMillis();
-        while(!isBlockValid(block)) {
+        while (!isBlockValid(block)) {
             block.nonce++;
         }
         double timeElapsedSeconds = (System.currentTimeMillis() - startTime) / 1000f;
-        System.out.printf("Proof::hashUntilValid(): Nonce Found! Took %.2f seconds to find nonce.\n", timeElapsedSeconds); 
+        System.out.printf("Proof::hashUntilValid(): Nonce Found! Took %.2f seconds to find nonce.\n",
+                timeElapsedSeconds);
         return block.nonce;
     }
 }

@@ -1,4 +1,5 @@
 package asch.coin;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -10,7 +11,7 @@ public abstract class Hashable implements Serializable {
     public byte[] hash() {
         System.out.println(this.getClass().getName() + "::hash() called");
         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-        try(ObjectOutputStream outputStream = new ObjectOutputStream(byteStream)) {
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(byteStream)) {
             outputStream.writeObject(this);
             outputStream.flush();
             byte[] ret = Util.hashBuffer(byteStream.toByteArray());
@@ -18,7 +19,7 @@ public abstract class Hashable implements Serializable {
             outputStream.close();
             byteStream.close();
             return ret;
-        } catch(IOException e) {
+        } catch (IOException e) {
             System.out.println("IOException: Failed to hash");
             e.printStackTrace(System.err);
         }
@@ -26,5 +27,6 @@ public abstract class Hashable implements Serializable {
     }
 
     public abstract int getSerializedSize();
+
     public abstract ByteBuffer serialize();
 }

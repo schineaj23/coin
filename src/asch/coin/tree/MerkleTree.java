@@ -1,4 +1,5 @@
 package asch.coin.tree;
+
 import asch.coin.Hashable;
 import asch.coin.Transaction;
 import asch.coin.Util;
@@ -14,13 +15,13 @@ import java.util.Collection;
     https://github.com/quux00/merkle-tree/blob/master/README.md
     */
 public class MerkleTree extends Hashable {
-    private static byte[] TREE_HEAD = {(byte)0xDE, (byte)0xAD};
+    private static byte[] TREE_HEAD = { (byte) 0xDE, (byte) 0xAD };
     private int numNodes = 0;
     private MerkleNode parentNode;
 
     public MerkleNode generateTree(Collection<Transaction> transactionList) {
         ArrayList<MerkleNode> nodes = new ArrayList<>();
-        for(Transaction t : transactionList) {
+        for (Transaction t : transactionList) {
             nodes.add(new MerkleNode(null, null, t.hash()));
         }
         return buildTree(nodes);
@@ -28,12 +29,12 @@ public class MerkleTree extends Hashable {
 
     private MerkleNode buildTree(ArrayList<MerkleNode> children) {
         ArrayList<MerkleNode> parents = new ArrayList<>();
-        while(children.size() != 1) {
+        while (children.size() != 1) {
             int index = 0, length = children.size();
             while (index < length) {
                 MerkleNode leftChild = children.get(index);
                 MerkleNode rightChild = null;
-                if((index + 1) < length) {
+                if ((index + 1) < length) {
                     rightChild = children.get(index + 1);
                 } else {
                     rightChild = new MerkleNode(null, null, leftChild.hash());
@@ -53,7 +54,7 @@ public class MerkleTree extends Hashable {
 
     @Override
     public byte[] hash() {
-        if(parentNode == null) {
+        if (parentNode == null) {
             throw new RuntimeException("Cannot hash() merkleTree, parentNode is null!");
         }
         return parentNode.hash();
@@ -69,7 +70,7 @@ public class MerkleTree extends Hashable {
     @Override
     public ByteBuffer serialize() {
         ArrayDeque<MerkleNode> queue = new ArrayDeque<>(numNodes / 2 + 1);
-        if(parentNode == null) {
+        if (parentNode == null) {
             System.out.println("MerkleTree::serializeTree() parent node == null!");
             return null;
         }
@@ -78,26 +79,16 @@ public class MerkleTree extends Hashable {
         System.out.println("buffer limit " + buf.limit());
         buf.put(TREE_HEAD);
         buf.putInt(numNodes);
-        while(!queue.isEmpty()) {
+        while (!queue.isEmpty()) {
             MerkleNode node = queue.remove();
             ByteBuffer serialized = node.serialize();
             // System.out.println(serialized.limit());
             buf.put(serialized);
-            if(node.getLeft() != null)
+            if (node.getLeft() != null)
                 queue.add(node.getLeft());
-            if(node.getRight() != null)
+            if (node.getRight() != null)
                 queue.add(node.getRight());
         }
         return buf;
-    }
-
-    // TODO: implement this entirely
-    public static boolean deserialize(ByteBuffer serializedTree, MerkleNode outParentNode) {
-        byte[] head = new byte[2];
-        serializedTree.get(0, head, 0, 2);
-        if(!Util.bufferEquality(TREE_HEAD, head))
-            return false;
-        
-        return true;
     }
 }

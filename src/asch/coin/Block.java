@@ -1,7 +1,9 @@
 package asch.coin;
+
 import asch.coin.tree.MerkleTree;
 
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.TreeMap;
 
 public class Block extends Hashable {
@@ -16,7 +18,8 @@ public class Block extends Hashable {
     public byte[] previousBlockHash;
 
     // FIXME: implement mining!
-    // Data added to merkle root to calculate a hash with the desired # of zeros so it's accepted by others 
+    // Data added to merkle root to calculate a hash with the desired # of zeros so
+    // it's accepted by others
     public int nonce;
 
     // Why are we creating a block if we don't have an initial transaction?
@@ -37,25 +40,33 @@ public class Block extends Hashable {
         return transactions.get(id);
     }
 
-    // FIXME: timestamp bug
+    public Collection<Transaction> getTransactions() {
+        return transactions.values();
+    }
+
     public void generateTimestamp() {
-        // Yes, I do realize that this loses precision, doesn't really matter though it's MY CURRENCY, MY AMERICA!
-        timestamp = (int)(System.currentTimeMillis() / 1000L);
+        // Yes, I do realize that this loses precision, doesn't really matter though
+        // it's MY CURRENCY, MY AMERICA!
+        timestamp = (int) (System.currentTimeMillis() / 1000L);
         timestampHash = Util.hashBuffer(ByteBuffer.allocate(8).putLong(timestamp).array());
     }
 
+    public int getTimestamp() {
+        return timestamp;
+    }
+
     public ByteBuffer getBlockHeader() {
-        if(merkleRoot == null) {
+        if (merkleRoot == null) {
             merkleRoot = new MerkleTree().generateTree(transactions.values()).hash();
         }
-        
-        if(timestampHash == null) {
+
+        if (timestampHash == null) {
             generateTimestamp();
         }
 
         int transactionsSize = getTransactionsSerializedSize();
 
-        // previousBlock (32 bytes) + merkleRoot (32 bytes) 
+        // previousBlock (32 bytes) + merkleRoot (32 bytes)
         // + timestamp (4 bytes) + size (4 bytes) + nonce (4 bytes) = 76 bytes
         ByteBuffer buffer = ByteBuffer.allocate(32 + 32 + 4 + 4 + 4);
         buffer.put(previousBlockHash).put(merkleRoot);
@@ -73,7 +84,7 @@ public class Block extends Hashable {
 
     private int getTransactionsSerializedSize() {
         int transactionsSize = 0;
-        for(Transaction t : transactions.values()) {
+        for (Transaction t : transactions.values()) {
             transactionsSize += t.getSerializedSize();
         }
         // Hopefully there aren't so many transactions such that we overflow! (surely)
@@ -91,7 +102,7 @@ public class Block extends Hashable {
     public ByteBuffer serialize() {
         ByteBuffer buffer = ByteBuffer.allocate(getSerializedSize());
         buffer.put(getBlockHeader());
-        for(Transaction t : transactions.values()) {
+        for (Transaction t : transactions.values()) {
             buffer.put(t.serialize());
         }
         return buffer;
@@ -100,7 +111,7 @@ public class Block extends Hashable {
     @Override
     public String toString() {
         String trans = "\n";
-        for(Transaction t : transactions.values()) {
+        for (Transaction t : transactions.values()) {
             trans += t;
         }
 
@@ -112,6 +123,8 @@ public class Block extends Hashable {
                 Nonce: %d
                 Transaction Count: %d
                 Transactions: %s
-                """, Util.bytesToHex(hash()), Util.bytesToHex(previousBlockHash), Util.bytesToHex(timestampHash), nonce, transactions.size(), trans);
+                [END BLOCK]
+                """, Util.bytesToHex(hash()), Util.bytesToHex(previousBlockHash), Util.bytesToHex(timestampHash), nonce,
+                transactions.size(), trans);
     }
 }

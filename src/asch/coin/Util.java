@@ -1,6 +1,10 @@
 package asch.coin;
+
+import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.X509EncodedKeySpec;
 
 public class Util {
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
@@ -23,10 +27,10 @@ public class Util {
     }
 
     public static boolean bufferEquality(byte[] a, byte[] b) {
-        if(a.length != b.length)
+        if (a.length != b.length)
             return false;
-        for(int i=0;i<a.length;i++) {
-            if(a[i] != b[i])
+        for (int i = 0; i < a.length; i++) {
+            if (a[i] != b[i])
                 return false;
         }
         return true;
@@ -38,9 +42,19 @@ public class Util {
             byte[] digest = md.digest(buffer);
             assert digest.length == 32;
             return digest;
-        } catch(NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             System.out.println("NoSuchAlgorithmException: " + e);
             return null;
         }
+    }
+
+    public static PublicKey keyFromBuffer(byte[] publicKeyBuffer) {
+        try {
+            return KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(publicKeyBuffer));
+        } catch(Exception e) {
+            System.out.printf("Key (Hash): %s\nVerification::keyFromBuffer() FAILED!\n", Util.bytesToHex(publicKeyBuffer));
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 }

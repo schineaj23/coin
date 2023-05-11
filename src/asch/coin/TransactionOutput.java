@@ -3,7 +3,8 @@ package asch.coin;
 import java.nio.ByteBuffer;
 
 public class TransactionOutput extends Hashable {
-    public TransactionOutput() {}
+    public TransactionOutput() {
+    }
 
     public TransactionOutput(double amount, byte[] destinationPublicKey) {
         this.amount = amount;
@@ -20,13 +21,14 @@ public class TransactionOutput extends Hashable {
         return String.format("""
                 Amount: %.3f
                 DestinationPublicKeySize: %d
-                DestinationPublicKey: %s
-                """, amount, destinationPublicKeySize, Util.bytesToHex(destinationPublicKey));
+                DestinationPublicKey(Hash): %s
+                """, amount, destinationPublicKeySize, Util.bytesToHex(Util.hashBuffer(destinationPublicKey)));
     }
 
     @Override
     public int getSerializedSize() {
-        // amount (double, 8 bytes) + publicKeySize (int, 4 bytes) + publicKey (publicKeySize bytes)
+        // amount (double, 8 bytes) + publicKeySize (int, 4 bytes) + publicKey
+        // (publicKeySize bytes)
         return 8 + 4 + destinationPublicKeySize;
     }
 

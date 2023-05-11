@@ -1,8 +1,9 @@
 package asch.coin;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 // This part is following the Bitcoin spec from the bitcoin white paper (Transactions section)
 // For the moment is mainly just a struct that contains the data for a transaction
@@ -23,37 +24,41 @@ public class Transaction extends Hashable {
         outputs.add(output);
     }
 
-    // Ensure that the inputs we get CANNOT be modified. 
+    // Ensure that the inputs we get CANNOT be modified.
     // We wouldn't want to accidentally mess up the transaction
-    public Collection<TransactionInput> getInputs() {
+    public List<TransactionInput> getInputs() {
         return Collections.unmodifiableList(inputs);
+    }
+
+    public List<TransactionOutput> getOutputs() {
+        return Collections.unmodifiableList(outputs);
     }
 
     @Override
     public String toString() {
         String ret = String.format("=============START TRANSACTION=============\n");
         ret += "TXID: " + getTransactionId() + "\n";
-        ret = String.format("=============START INPUTS=============\nInputs: %d\n", inputs.size());
-        for(TransactionInput input : inputs) {
+        ret += String.format("=============START INPUTS=============\nInputs: %d\n", inputs.size());
+        for (TransactionInput input : inputs) {
             ret += input + "\n";
         }
         ret += String.format("=============END INPUTS=============\n");
         ret += String.format("=============START OUTPUTS=============\nOutputs: %d\n", outputs.size());
-        for(TransactionOutput output : outputs) {
+        for (TransactionOutput output : outputs) {
             ret += output + "\n";
         }
-        ret += "=============END OUTPUTS=============\n=============END TRANSACTION=============\n";
+        ret += "=============END OUTPUTS=============\n=============END TRANSACTION=============";
         return ret;
     }
 
     @Override
     public int getSerializedSize() {
         // input count (int, 4 bytes) + output count (int, 4 bytes)
-        int size = 4 + 4; 
-        for(TransactionInput in : inputs) {
+        int size = 4 + 4;
+        for (TransactionInput in : inputs) {
             size += in.getSerializedSize();
         }
-        for(TransactionOutput out : outputs) {
+        for (TransactionOutput out : outputs) {
             size += out.getSerializedSize();
         }
         return size;
@@ -63,11 +68,11 @@ public class Transaction extends Hashable {
     public ByteBuffer serialize() {
         ByteBuffer buffer = ByteBuffer.allocate(getSerializedSize());
         buffer.putInt(inputs.size());
-        for(TransactionInput in : inputs) {
+        for (TransactionInput in : inputs) {
             buffer.put(in.serialize());
         }
         buffer.putInt(outputs.size());
-        for(TransactionOutput out : outputs) {
+        for (TransactionOutput out : outputs) {
             buffer.put(out.serialize());
         }
         return buffer;
