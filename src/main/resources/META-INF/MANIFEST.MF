@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Main-Class: com.asch.coin.Launcher
+Class-Path: javafx-controls-19-ea+7.jar javafx-fxml-19-ea+7-win.jar java
+ fx-base-19-ea+7-win.jar javafx-graphics-19-ea+7-win.jar javafx-controls
+ -19-ea+7-win.jar javafx-fxml-19-ea+7.jar javafx-base-19-ea+7.jar javafx
+ -graphics-19-ea+7.jar
+

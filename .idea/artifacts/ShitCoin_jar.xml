@@ -1,0 +1,18 @@
+<component name="ArtifactManager">
+  <artifact name="ShitCoin:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/ShitCoin_jar</output-path>
+    <root id="root">
+      <element id="archive" name="ShitCoin.jar">
+        <element id="module-output" name="ShitCoin" />
+      </element>
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-controls:19-ea+7" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-fxml:win:19-ea+7" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-base:win:19-ea+7" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-graphics:win:19-ea+7" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-controls:win:19-ea+7" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-fxml:19-ea+7" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-base:19-ea+7" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-graphics:19-ea+7" />
+    </root>
+  </artifact>
+</component>
