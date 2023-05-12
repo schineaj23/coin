@@ -8,11 +8,10 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.Objects;
 
 public class UIController {
     @FXML
@@ -35,20 +34,29 @@ public class UIController {
     @FXML
     public HBox innerBlockContainer;
 
+    @FXML
+    public Label balanceLabel;
+
+    @FXML
+    public Label pubKeyLabel;
 
     public void initialize() {
         walletChooser.setItems(FXCollections.observableList(Core.wallets));
         recipientChooser.setItems(FXCollections.observableList(Core.wallets));
         walletChooser.converterProperty().set(new WalletStringConverter());
         recipientChooser.converterProperty().set(new WalletStringConverter());
-
+        walletChooser.valueProperty().addListener((observable, oldWallet, curWallet) -> {
+            if(curWallet == null)
+                return;
+            balanceLabel.setText(String.format("%.3f", curWallet.getBalance()));
+            pubKeyLabel.setText(Util.bytesToHex(Objects.requireNonNull(Util.hashBuffer(curWallet.getPublicKey().getEncoded()))).substring(0, 20));
+        });
         sendButton.onActionProperty().set(new SendCoinHandler(this));
         mintButton.onActionProperty().set(new MintCoinHandler(this));
 
         updateBlockDisplay();
-    }
-
-    private int currentBlockIndex = 0;
+        }
+        private int currentBlockIndex = 0;
     public void updateBlockDisplay() {
         innerBlockContainer.setSpacing(20);
 
@@ -63,7 +71,6 @@ public class UIController {
             // Get timestamp of block creation
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             String formattedTime = Instant.ofEpochSecond(givenBlock.getTimestamp()).atZone(Calendar.getInstance().getTimeZone().toZoneId()).format(formatter);
-
             nonce.setText("Nonce: " + givenBlock.nonce + "\nBlock Time: " + formattedTime);
             container.getChildren().add(blockHash);
             container.getChildren().add(nonce);
@@ -73,6 +80,7 @@ public class UIController {
             for(Transaction t : givenBlock.getTransactions()) {
                 transactionContainer.getChildren().add(getTransactionSummary(t));
             }
+            transactionContainer.setSpacing(10);
             transactionContainer.autosize();
             transactionContainerPane.setContent(transactionContainer);
             transactionContainerPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
@@ -90,7 +98,10 @@ public class UIController {
     private VBox getTransactionSummary(Transaction transaction) {
         VBox container = new VBox();
         Label transactionId = new Label();
-        transactionId.setText("TXID: " + transaction.getTransactionId().toString());
+        transactionId.setText("TXID: " + transaction.getTransactionId().toString()+"\n");
+        if(Util.bufferEquality(transaction.getInputs().get(0).getSignature(), "Hello Coin!".getBytes())) {
+            transactionId.setText(transactionId.getText() + "(Coinbase Transaction)");
+        }
         container.getChildren().add(transactionId);
 
         TableView<TransactionInput> transactionInputTree = new TableView<>();
@@ -113,12 +124,12 @@ public class UIController {
 
         // TransactionOutput sub-columns
         TableColumn<TransactionOutput, String> destinationPublicKeyColumn = new TableColumn<>("DestPublicKey");
-        destinationPublicKeyColumn.setCellValueFactory(cellData -> new SimpleStringProperty(Util.bytesToHex(cellData.getValue().getDestinationPublicKey())));
+        destinationPublicKeyColumn.setCellValueFactory(cellData -> new SimpleStringProperty(Util.bytesToHex(Objects.requireNonNull(Util.hashBuffer(cellData.getValue().getDestinationPublicKey())))));
 
         TableColumn<TransactionOutput, String> amountColumn = new TableColumn<>("Amount");
-        destinationPublicKeyColumn.setCellValueFactory(cellData -> new SimpleStringProperty(Double.toString(cellData.getValue().getAmount())));
+        amountColumn.setCellValueFactory(cellData -> new SimpleStringProperty(Double.toString(cellData.getValue().getAmount())));
 
-        transactionOutputTree.getColumns().addAll(amountColumn, destinationPublicKeyColumn);
+        transactionOutputTree.getColumns().addAll(destinationPublicKeyColumn, amountColumn);
         transactionOutputTree.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         transactionOutputTree.setMaxHeight(100);
 

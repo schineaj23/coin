@@ -100,7 +100,7 @@ public class Core extends Application {
         Parent root = loader.load();
         primaryStage.setTitle("DrewCoin");
         primaryStage.setScene(new Scene(root));
-        primaryStage.setResizable(true);
+        primaryStage.setResizable(false);
         UIController controller = loader.getController();
 
         primaryStage.setOnHidden(e -> {

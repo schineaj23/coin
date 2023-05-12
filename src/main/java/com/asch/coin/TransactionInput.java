@@ -39,6 +39,10 @@ public class TransactionInput extends Hashable {
         return previousOutput;
     }
 
+    public byte[] getSignature() {
+        return signature;
+    }
+
     @Override
     public int getSerializedSize() {
         // TransactionID (32 bytes) + associatedOutput (4 bytes, int)

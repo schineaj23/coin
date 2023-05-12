@@ -54,12 +54,16 @@
             <ChoiceBox fx:id="recipientChooser" layoutX="126.0" layoutY="23.0" prefHeight="25.0" prefWidth="93.0" />
             <Label layoutX="247.0" layoutY="7.0" text="Amount" />
             <Label layoutX="20.0" layoutY="61.0" text="Blockchain Explorer" />
-            <Label layoutX="595.0" layoutY="61.0" text="Wallet Info" />
-            <ScrollPane fx:id="blockContainerScroll" layoutX="20.0" layoutY="78.0" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="445.0" prefWidth="569.0">
+            <Label layoutX="423.0" layoutY="7.0" text="Wallet Info" />
+            <ScrollPane fx:id="blockContainerScroll" layoutX="20.0" layoutY="78.0" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="445.0" prefWidth="744.0">
                <content>
                   <HBox fx:id="innerBlockContainer" />
                </content>
             </ScrollPane>
+            <Label layoutX="423.0" layoutY="23.0" text="Balance:" />
+            <Label fx:id="balanceLabel" layoutX="468.0" layoutY="23.0" text="0" />
+            <Label layoutX="423.0" layoutY="39.0" text="Public Key Hash (Truncated):" />
+            <Label fx:id="pubKeyLabel" layoutX="576.0" layoutY="39.0" text="0" />
          </children>
     </AnchorPane>
   </children>
