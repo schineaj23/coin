@@ -1,5 +1,6 @@
 package com.asch.coin;
 
+import com.asch.coin.ui.UIController;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -7,16 +8,17 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.*;
+import java.util.ArrayList;
 import java.util.Objects;
-import java.util.Scanner;
 
-public class Main extends Application {
-    static Wallet bobby = new Wallet("bobby");
-    static Wallet larry = new Wallet("larry");
-    static Wallet jimmy = new Wallet("jimmy");
+public class Core extends Application {
+    private static final Wallet bobby = new Wallet("bobby");
+    private static final Wallet larry = new Wallet("larry");;
+    private static final Wallet jimmy = new Wallet("jimmy");;
+    public static ArrayList<Wallet> wallets = new ArrayList<>();
+
     public static Transaction createCoinbaseTransaction(Wallet recipient, double amount) {
         Transaction transaction = new Transaction();
         TransactionInput input = new TransactionInput(new TransactionId(), 0xFFFFFFFF,
@@ -32,7 +34,7 @@ public class Main extends Application {
         return transaction;
     }
 
-    public static void test() {
+    private static void test() {
         // Transaction which contains a few shenanigans!
         // Mint a coin for bobby
         Transaction coinbaseTransaction = createCoinbaseTransaction(bobby, 2);
@@ -78,7 +80,16 @@ public class Main extends Application {
         larry.rebuildWallet();
     }
 
+    public Wallet[] getWallets() {
+        return new Wallet[] {bobby, larry, jimmy};
+    }
+
     public static void main(String[] args) throws NoSuchAlgorithmException, InterruptedException {
+        // Create a new instance so that it doesn't get mad at us.
+        wallets.add(bobby);
+        wallets.add(jimmy);
+        wallets.add(larry);
+
         test();
         launch(args);
     }
@@ -89,8 +100,9 @@ public class Main extends Application {
         Parent root = loader.load();
         primaryStage.setTitle("DrewCoin");
         primaryStage.setScene(new Scene(root));
-        primaryStage.setResizable(false);
+        primaryStage.setResizable(true);
         UIController controller = loader.getController();
+
         primaryStage.setOnHidden(e -> {
             controller.shutdown();
             Platform.exit();

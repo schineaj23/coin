@@ -3,6 +3,7 @@ package com.asch.coin;
 import com.asch.coin.tree.MerkleTree;
 
 import java.nio.ByteBuffer;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.TreeMap;
 
@@ -10,7 +11,7 @@ public class Block extends Hashable {
     private final TreeMap<TransactionId, Transaction> transactions = new TreeMap<>();
 
     public byte[] timestampHash;
-    private int timestamp; // this is internal to the class
+    private long timestamp; // this is internal to the class
 
     public byte[] merkleRoot;
 
@@ -47,11 +48,11 @@ public class Block extends Hashable {
     public void generateTimestamp() {
         // Yes, I do realize that this loses precision, doesn't really matter though
         // it's MY CURRENCY, MY AMERICA!
-        timestamp = (int) (System.currentTimeMillis() / 1000L);
+        timestamp = Instant.now().getEpochSecond();
         timestampHash = Util.hashBuffer(ByteBuffer.allocate(8).putLong(timestamp).array());
     }
 
-    public int getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
@@ -64,13 +65,17 @@ public class Block extends Hashable {
             generateTimestamp();
         }
 
+        if(previousBlockHash == null) {
+            previousBlockHash = Blockchain.getInstance().getMostRecentBlock().hash();
+        }
+
         int transactionsSize = getTransactionsSerializedSize();
 
         // previousBlock (32 bytes) + merkleRoot (32 bytes)
-        // + timestamp (4 bytes) + size (4 bytes) + nonce (4 bytes) = 76 bytes
-        ByteBuffer buffer = ByteBuffer.allocate(32 + 32 + 4 + 4 + 4);
+        // + timestamp (8 bytes) + size (4 bytes) + nonce (4 bytes) = 80 bytes
+        ByteBuffer buffer = ByteBuffer.allocate(32 + 32 + 8 + 4 + 4);
         buffer.put(previousBlockHash).put(merkleRoot);
-        buffer.putInt(timestamp).putInt(transactionsSize).putInt(nonce);
+        buffer.putLong(timestamp).putInt(transactionsSize).putInt(nonce);
 
         return buffer;
     }

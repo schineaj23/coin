@@ -16,6 +16,14 @@ public class TransactionOutput extends Hashable {
     int destinationPublicKeySize;
     byte[] destinationPublicKey;
 
+    public byte[] getDestinationPublicKey() {
+        return destinationPublicKey;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
     @Override
     public String toString() {
         return String.format("""
